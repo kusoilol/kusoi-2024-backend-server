@@ -1,22 +1,16 @@
-from fastapi import APIRouter, UploadFile, File, Depends, Form
-from app.schemas import UploadSolutionRequest, UploadSolutionResponse, Language
+from uuid import UUID
+from fastapi import APIRouter, UploadFile, HTTPException
+from app.schemas import Language
+from app.services import TeamManager
 
 router = APIRouter()
 
 
-def get_user_request(user_id: int = Form(...), language: Language = Form(...)) -> UploadSolutionRequest:
-    return UploadSolutionRequest(user_id=user_id, language=language)
-
-
 @router.post("/upload_solution")
-async def upload_solution(code: UploadFile = File(...),
-                            user_data: UploadSolutionRequest = Depends(get_user_request)) \
-        -> UploadSolutionResponse:
-    ...
-    """
+async def upload_solution(code: UploadFile, team_id: UUID, language: Language) \
+        -> int:
+    team_manager = TeamManager(team_id)
     try:
-        Docker.get_user(user_data.user_id).upload_new_solution(code)
-    except Exception:
-        return Amogus
-    return Docker.get_user(user_data.user_id).current_solution().id
-    """
+        return team_manager.create_solution(code.file, language)
+    except IOError as e:
+        raise HTTPException(status_code=500, detail=str(e))
