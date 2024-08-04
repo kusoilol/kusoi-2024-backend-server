@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from solution_language import Language
+from .solution_language import Language
 
 
 class UploadSolutionRequest(BaseModel):
