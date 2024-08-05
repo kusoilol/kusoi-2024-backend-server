@@ -26,6 +26,7 @@ def check_any_solutions(team_manager: TeamManager):
         raise HTTPException(status_code=404,
                             detail=f"Team {team_manager.team_id} doesn't have any solutions yet")
 
+
 @router.get("/last")
 async def last_solution(team_id: UUID) -> tuple[int, int]:
     """
@@ -42,6 +43,7 @@ async def get_main_solution(team_id: UUID) -> FileResponse:
     check_any_solutions(team_manager)
     return team_manager.get_main_solution()
 
+
 @router.put("/main")
 async def select_main(team_id: UUID, solution_id: int):
     team_manager = TeamManager(team_id)
@@ -54,7 +56,7 @@ async def select_main(team_id: UUID, solution_id: int):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/upload")
+@router.post("/")
 async def upload_solution(code: UploadFile, team_id: UUID, language: Language) \
         -> int:
     team_manager = TeamManager(team_id)
