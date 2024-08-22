@@ -1,1 +1,1 @@
-from .solution_language import Language
+from .language import Language
