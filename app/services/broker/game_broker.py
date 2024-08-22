@@ -55,7 +55,7 @@ class GameBroker:
             _log('\n'.join(data))
             player.send_input('\n'.join(data))
         except (RuntimeError, TypeError, ValueError, IOError) as e:
-            _log(f"Player {self.turn % 2 + 1} couldn't get input or something: {str(e)}")
+            _log(f"Player {self.turn % 2 + 1} couldn't get input or something\n: {str(e)}")
             self._cleanup()
             return (self.turn + 1) % 2 + 1
 
