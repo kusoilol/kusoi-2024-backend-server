@@ -15,7 +15,7 @@ class FileInteractor:
         self.output_thread = None
         self.lock = threading.Lock()
 
-    def run_subprocess(self) -> None:
+    def run_subprocess(self, user: str = "root") -> None:
         cmd = []
         match self.language:
             case Language.PYTHON:
@@ -26,7 +26,8 @@ class FileInteractor:
         self.process = subprocess.Popen(cmd,
                                         stdin=subprocess.PIPE,
                                         stdout=subprocess.PIPE,
-                                        text=True)
+                                        text=True,
+                                        user=user)
 
         self.output_thread = threading.Thread(target=self._enqueue_output, daemon=True)
         self.output_thread.start()

@@ -12,14 +12,14 @@ class GameBroker:
     tester: FileInteractor
     turn: int
 
-    def __init__(self, path_1: str, lang_1: Language,
-                 path_2: str, lang_2: Language,
+    def __init__(self, path_1: str, lang_1: Language, user_1: str,
+                 path_2: str, lang_2: Language, user_2: str,
                  tester_path: str):
         self.alice = FileInteractor(path_1, lang_1)
         self.bob = FileInteractor(path_2, lang_2)
         self.tester = FileInteractor(tester_path, Language.PYTHON)
-        self.alice.run_subprocess()
-        self.bob.run_subprocess()
+        self.alice.run_subprocess(user_1)
+        self.bob.run_subprocess(user_2)
         self.tester.run_subprocess()
         self.turn = 0
 
@@ -67,9 +67,8 @@ class GameBroker:
                 return (self.turn + 1) % 2 + 1
             _log(f"Player {self.turn % 2 + 1}")
             _log(n)
-            n = int(n)
-            data = []
-            for _ in range(n):
+            data = [n]
+            for _ in range(int(n)):
                 data.append(player.read_output())
         except (RuntimeError, TypeError, ValueError, IOError) as e:
             _log(f"Player {self.turn % 2 + 1} incorrect answer to tester's query\n: {str(e)}")
@@ -80,6 +79,7 @@ class GameBroker:
             _log('\n'.join(data))
             self.tester.send_input('\n'.join(data))
         except (RuntimeError, TypeError, ValueError, IOError):
+            self._cleanup()
             raise
         self.turn += 1
         return 0
