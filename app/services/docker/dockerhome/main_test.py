@@ -25,18 +25,19 @@ class FileInteractor:
         self.output_thread = None
         self.lock = threading.Lock()
 
-    def run_subprocess(self) -> None:
+    def run_subprocess(self, user: str = "root") -> None:
         cmd = []
         match self.language:
             case Language.PYTHON:
-                cmd = ['python', '-u', self.path]
+                cmd = ['python3', '-u', self.path]
             case Language.CPP20GPP:
                 pass
 
         self.process = subprocess.Popen(cmd,
                                         stdin=subprocess.PIPE,
                                         stdout=subprocess.PIPE,
-                                        text=True)
+                                        text=True,
+                                        user=user)
 
         self.output_thread = threading.Thread(target=self._enqueue_output, daemon=True)
         self.output_thread.start()
@@ -87,14 +88,14 @@ class GameBroker:
     tester: FileInteractor
     turn: int
 
-    def __init__(self, path_1: str, lang_1: Language,
-                 path_2: str, lang_2: Language,
+    def __init__(self, path_1: str, lang_1: Language, user_1: str,
+                 path_2: str, lang_2: Language, user_2: str,
                  tester_path: str):
         self.alice = FileInteractor(path_1, lang_1)
         self.bob = FileInteractor(path_2, lang_2)
         self.tester = FileInteractor(tester_path, Language.PYTHON)
-        self.alice.run_subprocess()
-        self.bob.run_subprocess()
+        self.alice.run_subprocess(user_1)
+        self.bob.run_subprocess(user_2)
         self.tester.run_subprocess()
         self.turn = 0
 
@@ -130,7 +131,7 @@ class GameBroker:
             _log('\n'.join(data))
             player.send_input('\n'.join(data))
         except (RuntimeError, TypeError, ValueError, IOError) as e:
-            _log(f"Player {self.turn % 2 + 1} couldn't get input or something: {str(e)}")
+            _log(f"Player {self.turn % 2 + 1} couldn't get input or something\n: {str(e)}")
             self._cleanup()
             return (self.turn + 1) % 2 + 1
 
@@ -142,9 +143,8 @@ class GameBroker:
                 return (self.turn + 1) % 2 + 1
             _log(f"Player {self.turn % 2 + 1}")
             _log(n)
-            n = int(n)
-            data = []
-            for _ in range(n):
+            data = [n]
+            for _ in range(int(n)):
                 data.append(player.read_output())
         except (RuntimeError, TypeError, ValueError, IOError) as e:
             _log(f"Player {self.turn % 2 + 1} incorrect answer to tester's query\n: {str(e)}")
@@ -155,16 +155,19 @@ class GameBroker:
             _log('\n'.join(data))
             self.tester.send_input('\n'.join(data))
         except (RuntimeError, TypeError, ValueError, IOError):
+            self._cleanup()
             raise
         self.turn += 1
         return 0
 
 
-PATH_1 = "app/services/tester/test/alice.py"
-PATH_2 = "app/services/tester/test/bob.py"
-PATH_3 = "app/services/tester/test/tester.py"
+PATH_1 = "alice.py"
+PATH_2 = "bob.py"
+PATH_3 = "tester.py"
 
-game_broker = GameBroker(PATH_1, Language.PYTHON, PATH_2, Language.PYTHON, PATH_3)
+game_broker = GameBroker(PATH_1, Language.PYTHON, "alice",
+                         PATH_2, Language.PYTHON, "bob",
+                         PATH_3)
 while True:
     if x := game_broker.make_move():
         print(x)
