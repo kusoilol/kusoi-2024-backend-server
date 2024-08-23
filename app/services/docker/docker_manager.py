@@ -1,14 +1,10 @@
 import os
 import tarfile
-
 import docker
-
 import docker.errors
-
 from docker.models.containers import Container
 
 from config import DOCKERPATH, TESTFOLDER, MAIN_TESTER
-
 from app.schemas import Language
 
 
@@ -100,9 +96,11 @@ class DockerManager:
         self.restrict_permission(username, filename)
 
     def run_game(self, alice_path: str, alice_lang: Language,
-                 bob_path: str, bob_lang: Language) -> str:
+                 bob_path: str, bob_lang: Language,
+                 build_image: bool = True) -> str:
         try:
-            self.build_image(DOCKERPATH)
+            if build_image:
+                self.build_image(DOCKERPATH)
             self.run_container()
             self.setup_player(alice_path, alice_lang, 'alice')
             self.setup_player(bob_path, bob_lang, 'bob')
@@ -111,9 +109,8 @@ class DockerManager:
         finally:
             self.cleanup()
 
-
-PATH_1 = "C:\\Programming\\KUSOI\\server\\app\\services\\docker\\test\\alice.py"
-PATH_2 = "C:\\Programming\\KUSOI\\server\\app\\services\\docker\\test\\bob.py"
+# PATH_1 = "C:\\Programming\\KUSOI\\server\\app\\services\\docker\\test\\alice.py"
+# PATH_2 = "C:\\Programming\\KUSOI\\server\\app\\services\\docker\\test\\bob.py"
 # DST_1 = "app/"
 # DST_2 = "app/"
 # DDST_1 = "alice.py"

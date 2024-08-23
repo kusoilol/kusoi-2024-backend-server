@@ -27,6 +27,11 @@ class TeamManager:
             raise FileNotFoundError(f"Team {self.team_id} doesn't have any solutions yet")
         return path_join(self._team_path, TeamManager._get_files_in_dir(self._team_path)[0])
 
+    def get_language_of_main(self) -> Language:
+        data = self.get_main_filename()[0].split('.')
+        extension = '.'.join(data[1:])
+        return Language(extension)
+
     def _get_history_sols(self):
         return TeamManager._get_files_in_dir(path_join(self._team_path, HISTORY_NAME))
 
