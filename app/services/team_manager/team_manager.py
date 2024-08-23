@@ -69,8 +69,8 @@ class TeamManager:
 
     def get_solution(self, solution_id: int):
         """
-        return filepath to solution with given id
-            or raise FileNotFoundError if such solution doesn't exist
+        :return: filepath to solution with given id
+        :raise: FileNotFoundError if such solution doesn't exist
         """
         main_sol, history_sols = self._get_all_files()
         if main_sol and TeamManager._get_id_from_filename(main_sol[0]) == solution_id:
