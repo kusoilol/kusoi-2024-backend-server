@@ -5,8 +5,9 @@ import docker.errors
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from app.services import TeamManager, DockerManager, DBManager
+from app.services import TeamManager, DockerManager
 from app.schemas import Language
+from app.db import db
 
 router = APIRouter(prefix="/game")
 
@@ -47,7 +48,6 @@ async def play(first_team: UUID, second_team: UUID) -> tuple[str, UUID, UUID]:
     else:
         winner = first_team if winner == '1' else second_team
     log = '\n'.join(out)
-    db = DBManager()
     game_id = db.add_game(first_team, second_team, winner, log)
     db.close()
     return log, winner, game_id
@@ -62,7 +62,7 @@ class PlayResponse(BaseModel):
 
 @router.get('/list')
 async def get_games_by_team_id(team_id: UUID) -> list[PlayResponse] | None:
-    data = DBManager().get_games(team_id)
+    data = db.get_games(team_id)
     if data is None:
         return None
     out = []
@@ -76,4 +76,4 @@ async def get_games_by_team_id(team_id: UUID) -> list[PlayResponse] | None:
 
 @router.get('/')
 async def get_game_by_game_id(game_id: UUID) -> str | None:
-    return DBManager().get_log(game_id)
+    return db.get_log(game_id)

@@ -2,8 +2,8 @@ from uuid import UUID
 from typing import List
 
 from fastapi import APIRouter
-from app.services import DBManager
 from .game import play
+from app.db import db
 
 router = APIRouter(prefix="/tournament")
 
@@ -14,8 +14,6 @@ async def run_tournament(teams: List[UUID]) -> dict:
     :param teams: participating teams
     :return: dictionary: key - team_id, value = list[previous_score, delta]
     """
-    db = DBManager()
-
     data = db.dump_scoreboard(teams)
     new_data = data
     for key, val in data.items():
@@ -39,4 +37,4 @@ async def run_tournament(teams: List[UUID]) -> dict:
 
 @router.get('/score')
 async def get_score(team_id: UUID) -> int:
-    return DBManager().get_score(team_id)
+    return db.get_score(team_id)
