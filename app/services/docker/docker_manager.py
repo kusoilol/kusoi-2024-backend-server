@@ -69,7 +69,7 @@ class DockerManager:
         try:
             if not self.container or isinstance(self.container, bytes):
                 return None
-            exit_code, output = self.container.exec_run(cmd=cmd)
+            exit_code, output = self.container.exec_run(cmd=cmd, stderr=False)
             return output.decode()
         except docker.errors.DockerException:
             self.cleanup()

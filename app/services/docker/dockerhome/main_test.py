@@ -1,3 +1,4 @@
+import sys
 from enum import Enum
 import queue
 import subprocess
@@ -81,6 +82,8 @@ class FileInteractor:
 def _log(data: str):
     print(data)
 
+def _logErr(data: str):
+    print(data, file=sys.stderr)
 
 class GameBroker:
     alice: FileInteractor
@@ -131,7 +134,8 @@ class GameBroker:
             _log('\n'.join(data))
             player.send_input('\n'.join(data))
         except (RuntimeError, TypeError, ValueError, IOError) as e:
-            _log(f"Player {self.turn % 2 + 1} couldn't get input or something\n: {str(e)}")
+            _logErr(f"Player {self.turn % 2 + 1} couldn't get input or something\n: {str(e)}")
+            _log(f'WIN {(self.turn + 1) % 2 + 1}')
             self._cleanup()
             return (self.turn + 1) % 2 + 1
 
@@ -145,7 +149,8 @@ class GameBroker:
             _log(n)
             data = [n]
         except (RuntimeError, TypeError, ValueError, IOError) as e:
-            _log(f"Player {self.turn % 2 + 1} incorrect answer to tester's query\n: {str(e)}")
+            _logErr(f"Player {self.turn % 2 + 1} incorrect answer to tester's query\n: {str(e)}")
+            _log(f'WIN {(self.turn + 1) % 2 + 1}')
             self._cleanup()
             return (self.turn + 1) % 2 + 1
 
