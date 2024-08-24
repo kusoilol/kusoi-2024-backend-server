@@ -38,12 +38,14 @@ class DBManager:
                 continue
         return game_id
 
-    def game_id_by_team_id(self, team_id: uuid.UUID) -> list[tuple] | None:
+    def games_by_team_id(self, team_id: uuid.UUID) -> list[tuple] | None:
         data = []
         team_id = str(team_id)
-        for row in self.cursor.execute("SELECT timestamp, game_id, winner FROM game WHERE team1 = ?", (team_id,)):
+        for row in self.cursor.execute("SELECT timestamp, game_id, winner, team2 FROM game WHERE team1 = ?",
+                                       (team_id,)):
             data.append(row)
-        for row in self.cursor.execute("SELECT timestamp, game_id, winner FROM game WHERE team2 = ?", (team_id,)):
+        for row in self.cursor.execute("SELECT timestamp, game_id, winner, team1 FROM game WHERE team2 = ?",
+                                       (team_id,)):
             data.append(row)
         if not data:
             return None

@@ -3,6 +3,8 @@ from uuid import UUID
 
 import docker.errors
 from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+
 from app.services import TeamManager, DockerManager, DBManager
 from app.schemas import Language
 
@@ -51,9 +53,25 @@ async def play(first_team: UUID, second_team: UUID) -> tuple[str, UUID, UUID]:
     return log, winner, game_id
 
 
+class PlayResponse(BaseModel):
+    timestamp: str
+    game_id: UUID
+    winner: UUID
+    opponent: UUID
+
+
 @router.get('/list')
-async def get_game_ids_by_team_id(team_id: UUID) -> list[tuple] | None:
-    return DBManager().game_id_by_team_id(team_id)
+async def get_games_by_team_id(team_id: UUID) -> list[PlayResponse] | None:
+    data = DBManager().games_by_team_id(team_id)
+    if data is None:
+        return None
+    out = []
+    for a, b, c, d in data:
+        out.append(PlayResponse(timestamp=a,
+                                game_id=b,
+                                winner=c,
+                                opponent=d))
+    return out
 
 
 @router.get('/')
