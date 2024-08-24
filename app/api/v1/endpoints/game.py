@@ -36,7 +36,7 @@ async def play(first_team: UUID, second_team: UUID) -> tuple[str, UUID, UUID]:
         first_team, second_team = second_team, first_team
         first_path, second_path = second_path, first_path
         first_lang, second_lang = second_lang, first_lang
-    out = [str(first_team)]
+    out = []
     for i in range(3):
         try:
             dm = DockerManager()
