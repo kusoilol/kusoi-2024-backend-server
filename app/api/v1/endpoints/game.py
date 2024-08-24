@@ -39,7 +39,11 @@ async def play(first_team: UUID, second_team: UUID) -> tuple[str, UUID, UUID]:
                 raise HTTPException(status_code=500, detail=str(e))
 
     winner = get_result_from_logs(out)
-    winner = first_team if winner == '1' else second_team
+    if winner == '-1':
+        # non-existent winner so everybody loses
+        winner = "455bcbdf-1bc1-41b4-b876-e298bd4c6971"
+    else:
+        winner = first_team if winner == '1' else second_team
     log = '\n'.join(out)
     db = DBManager()
     game_id = db.add_game(first_team, second_team, winner, log)
