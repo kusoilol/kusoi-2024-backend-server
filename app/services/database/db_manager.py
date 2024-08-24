@@ -22,6 +22,8 @@ class DBManager:
                                 log TEXT
                             )
                         """)
+        res = self.cursor.execute("SELECT name FROM sqlite_master WHERE name='scoreboard'")
+        if res.fetchone() is None:
             self.cursor.execute("""
             CREATE TABLE scoreboard(
             team_id TEXT PRIMARY KEY,
