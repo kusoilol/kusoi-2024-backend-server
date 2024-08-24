@@ -1,4 +1,9 @@
+import io
+import os
+import shutil
 import random
+import time
+import uuid
 from uuid import UUID
 
 import docker.errors
@@ -49,7 +54,6 @@ async def play(first_team: UUID, second_team: UUID) -> tuple[str, UUID, UUID]:
         winner = first_team if winner == '1' else second_team
     log = '\n'.join(out)
     game_id = db.add_game(first_team, second_team, winner, log)
-    db.close()
     return log, winner, game_id
 
 
@@ -77,3 +81,38 @@ async def get_games_by_team_id(team_id: UUID) -> list[PlayResponse] | None:
 @router.get('/')
 async def get_game_by_game_id(game_id: UUID) -> str | None:
     return db.get_log(game_id)
+
+
+class Submission(BaseModel):
+    code: str
+    team_id: UUID
+    language: Language
+
+
+def remove_directory(path: str):
+    shutil.rmtree(path)
+    os.rmdir(path)
+
+
+@router.post('/local')
+async def local_play(item: Submission) -> tuple[str, str, UUID]:
+    dummy_team = uuid.uuid4()
+    tm = TeamManager(dummy_team)
+    with io.BytesIO(item.code.encode()) as file:
+        tm.create_solution(file, item.language)
+    result = await play(item.team_id, dummy_team)
+    try:
+        remove_directory(tm._team_path)
+    except (OSError, IOError, FileExistsError, FileNotFoundError) as e:
+        print(str(e))
+    except PermissionError as e:
+        time.sleep(0.1)
+        try:
+            remove_directory(tm._team_path)
+        except Exception as a:
+            print(str(e), 'then', str(a))
+    out = list(result)
+    if out[1] == dummy_team:
+        out[1] = 'bot'
+    out[1] = str(out[1])
+    return tuple(out)

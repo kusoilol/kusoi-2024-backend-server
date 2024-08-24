@@ -64,11 +64,14 @@ class Submission(BaseModel):
     team_id: UUID
     language: Language
 
+
 @router.post("/")
 async def upload_solution(data: Submission) \
         -> int:
     team_manager = TeamManager(data.team_id)
     try:
-        return team_manager.create_solution(io.BytesIO(data.code.encode()), data.language)
+        with io.BytesIO(data.code.encode()) as file:
+            res = team_manager.create_solution(file, data.language)
+        return res
     except IOError as e:
         raise HTTPException(status_code=500, detail=str(e))

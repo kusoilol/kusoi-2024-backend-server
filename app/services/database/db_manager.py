@@ -35,15 +35,16 @@ class DBManager:
     def add_game(self, team1: uuid.UUID, team2: uuid.UUID, winner: uuid.UUID, log: str) -> uuid.UUID:
         game_id = uuid.uuid4()
         data = (str(game_id), str(team1), str(team2), str(winner), log)
-        self.cursor.execute("INSERT INTO game (game_id, team1, team2, winner, log) VALUES(?, ?, ?, ?, ?)", data)
         for i in range(3):
             try:
+                self.cursor.execute("INSERT INTO game (game_id, team1, team2, winner, log) VALUES(?, ?, ?, ?, ?)", data)
                 self._conn.commit()
                 break
             except sqlite3.DatabaseError as e:
                 time.sleep(0.1)
                 if i == 2:
                     print(str(e))
+                    raise
                 continue
         return game_id
 
