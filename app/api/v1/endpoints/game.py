@@ -3,7 +3,7 @@ from uuid import UUID
 
 import docker.errors
 from fastapi import APIRouter, HTTPException
-from app.services import TeamManager, DockerManager
+from app.services import TeamManager, DockerManager, DBManager
 from app.schemas import Language
 
 router = APIRouter(prefix="/game")
@@ -16,8 +16,8 @@ def get_data_of_team(team_id: UUID) -> tuple[str, Language]:
     return filepath, language
 
 
-@router.get("/")
-def play(first_team: UUID, second_team: UUID) -> str:
+@router.get("/run")
+def play(first_team: UUID, second_team: UUID) -> tuple[str, UUID]:
     first_path, first_lang = get_data_of_team(first_team)
     second_path, second_lang = get_data_of_team(second_team)
     if random.choice([False, True]):
@@ -28,10 +28,22 @@ def play(first_team: UUID, second_team: UUID) -> str:
     for i in range(3):
         try:
             dm = DockerManager()
-            result = dm.run_game(first_path, first_lang, second_path, second_lang)
-            out.append(result)
+            res = dm.run_game(first_path, first_lang, second_path, second_lang)
+            out.append(res)
             break
         except docker.errors.DockerException as e:
             if i == 2:
                 raise HTTPException(status_code=500, detail=str(e))
-    return '\n'.join(out)
+    result = '\n'.join(out)
+    db = DBManager()
+    game_id = db.add_game(first_team, second_team, result)
+    db.close()
+    return result, game_id
+
+@router.get('/list')
+def get_game_ids_by_team_id(team_id: UUID) -> list[tuple]:
+    return DBManager().game_id_by_team_id(team_id)
+
+@router.get('/')
+def get_game_by_game_id(game_id: UUID) -> str:
+    return DBManager().result_by_game_id(game_id)
