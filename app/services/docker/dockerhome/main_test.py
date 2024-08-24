@@ -37,8 +37,8 @@ class FileInteractor:
         self.process = subprocess.Popen(cmd,
                                         stdin=subprocess.PIPE,
                                         stdout=subprocess.PIPE,
-                                        text=True)
-                                        # user=user)
+                                        text=True,
+        user=user)
 
         self.output_thread = threading.Thread(target=self._enqueue_output, daemon=True)
         self.output_thread.start()
@@ -82,8 +82,10 @@ class FileInteractor:
 def _log(data: str):
     print(data)
 
+
 def _logErr(data: str):
     print(data, file=sys.stderr)
+
 
 class GameBroker:
     alice: FileInteractor

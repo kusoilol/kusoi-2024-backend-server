@@ -76,12 +76,12 @@ for i in range(100):
                     print('win', i + 1)
                     exit()
         if i == 0:
-            print('setup', FIELD_HEIGHT + 1)
+            print('setup', FIELD_HEIGHT + 1 + tanks_amount + 1 + len(bullets))
             print(FIELD_HEIGHT, FIELD_WIDTH)
             for line in field:
                 print(''.join(line))
-            continue
-        print('data', tanks_amount + 1 + len(bullets))
+        else:
+            print('data', tanks_amount + 1 + len(bullets))
         print(tanks[team].pos.x, tanks[team].pos.y, READABLE_DIRS[tanks[team].dir])
         for team2 in range(tanks_amount):
             if team != team2:
