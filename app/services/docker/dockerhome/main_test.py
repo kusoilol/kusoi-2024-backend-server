@@ -175,5 +175,4 @@ game_broker = GameBroker(PATH_1, Language.PYTHON, "alice",
                          PATH_3)
 while True:
     if x := game_broker.make_move():
-        print(x)
         break
