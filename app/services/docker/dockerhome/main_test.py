@@ -137,7 +137,7 @@ class GameBroker:
             player.send_input('\n'.join(data))
         except (RuntimeError, TypeError, ValueError, IOError) as e:
             _logErr(f"Player {self.turn % 2 + 1} couldn't get input or something\n: {str(e)}")
-            _log(f'WIN {(self.turn + 1) % 2 + 1}')
+            _log(f'win {(self.turn + 1) % 2 + 1}')
             self._cleanup()
             return (self.turn + 1) % 2 + 1
 
@@ -152,7 +152,7 @@ class GameBroker:
             data = [n]
         except (RuntimeError, TypeError, ValueError, IOError) as e:
             _logErr(f"Player {self.turn % 2 + 1} incorrect answer to tester's query\n: {str(e)}")
-            _log(f'WIN {(self.turn + 1) % 2 + 1}')
+            _log(f'win {(self.turn + 1) % 2 + 1}')
             self._cleanup()
             return (self.turn + 1) % 2 + 1
 
