@@ -116,7 +116,6 @@ class GameBroker:
         player = self.alice if self.turn % 2 == 0 else self.bob
         try:
             command, n = self.tester.read_output().split()
-            _log("Tester")
             _log(command + " " + n)
             n = int(n)
         except (RuntimeError, TypeError, ValueError, IOError):
@@ -147,7 +146,6 @@ class GameBroker:
                 _logErr(f"Player {self.turn % 2 + 1} didn't answer to tester's query")
                 self._cleanup()
                 return (self.turn + 1) % 2 + 1
-            _log(f"Player {self.turn % 2 + 1}")
             _log(n)
             data = [n]
         except (RuntimeError, TypeError, ValueError, IOError) as e:
