@@ -22,6 +22,13 @@ class DBManager:
                                 log TEXT
                             )
                         """)
+            self.cursor.execute("""
+            CREATE TABLE scoreboard(
+            team_id TEXT PRIMARY KEY,
+            score INTEGER
+            )
+            """)
+            self._conn.commit()
 
     def add_game(self, team1: uuid.UUID, team2: uuid.UUID, winner: uuid.UUID, log: str) -> uuid.UUID:
         game_id = uuid.uuid4()
@@ -38,7 +45,16 @@ class DBManager:
                 continue
         return game_id
 
-    def games_by_team_id(self, team_id: uuid.UUID) -> list[tuple] | None:
+    def inc_score(self, team_id: uuid.UUID, add: int):
+        if self.cursor.execute("SELECT * FROM scoreboard WHERE team_id = ?",
+                               (str(team_id),)).fetchone() is None:
+            self.cursor.execute("INSERT INTO scoreboard VALUES (?, ?)", (str(team_id), 0))
+
+        self.cursor.execute("UPDATE scoreboard SET score = score + ? WHERE team_id = ?",
+                            (add, str(team_id),))
+        self._conn.commit()
+
+    def get_games(self, team_id: uuid.UUID) -> list[tuple] | None:
         data = []
         team_id = str(team_id)
         for row in self.cursor.execute("SELECT timestamp, game_id, winner, team2 FROM game WHERE team1 = ?",
@@ -51,7 +67,7 @@ class DBManager:
             return None
         return data
 
-    def log_by_game_id(self, game_id: uuid.UUID) -> str | None:
+    def get_log(self, game_id: uuid.UUID) -> str | None:
         data = []
         for row in self.cursor.execute("SELECT log FROM game WHERE game_id = ?", (str(game_id),)):
             data.append(row[0])
@@ -59,9 +75,24 @@ class DBManager:
             return None
         return data[0]
 
-    def score_by_team_id(self, team_id: uuid.UUID) -> int:
-        return self.cursor.execute("SELECT COUNT(*) FROM game WHERE winner = ?",
-                                   (str(team_id),)).fetchone()[0]
+    def get_score(self, team_id: uuid.UUID) -> int:
+        res = self.cursor.execute("SELECT score FROM scoreboard WHERE team_id = ?",
+                                  (str(team_id),)).fetchone()
+        if res is None:
+            return 0
+        return res[0]
+
+    def dump_scoreboard(self, teams: list[uuid.UUID]) -> dict:
+        """
+        :param teams: list of teams which result will be returned
+        :return: scoreboard dump
+        """
+        teams = set(teams)
+        data = dict()
+        for team_id, score in self.cursor.execute("SELECT * from scoreboard").fetchall():
+            if uuid.UUID(team_id) in teams:
+                data[team_id] = score
+        return data
 
     def close(self) -> None:
         self._conn.close()

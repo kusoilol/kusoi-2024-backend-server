@@ -62,7 +62,7 @@ class PlayResponse(BaseModel):
 
 @router.get('/list')
 async def get_games_by_team_id(team_id: UUID) -> list[PlayResponse] | None:
-    data = DBManager().games_by_team_id(team_id)
+    data = DBManager().get_games(team_id)
     if data is None:
         return None
     out = []
@@ -76,4 +76,4 @@ async def get_games_by_team_id(team_id: UUID) -> list[PlayResponse] | None:
 
 @router.get('/')
 async def get_game_by_game_id(game_id: UUID) -> str | None:
-    return DBManager().log_by_game_id(game_id)
+    return DBManager().get_log(game_id)
