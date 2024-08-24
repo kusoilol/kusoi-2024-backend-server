@@ -4,6 +4,7 @@ from typing import List
 from fastapi import APIRouter
 from .game import play
 from app.db import db
+from app.services.team_manager import TeamManager
 
 router = APIRouter(prefix="/tournament")
 
@@ -14,6 +15,7 @@ async def run_tournament(teams: List[UUID]) -> dict:
     :param teams: participating teams
     :return: dictionary: key - team_id, value = list[previous_score, delta]
     """
+
     data = db.dump_scoreboard(teams)
     new_data = data
     for key, val in data.items():
@@ -21,6 +23,8 @@ async def run_tournament(teams: List[UUID]) -> dict:
     data = new_data
 
     for i in range(len(teams)):
+        if not TeamManager(teams[i]).has_solutions():
+            continue
         for j in range(i + 1, len(teams)):
             log, winner, game_id = await play(teams[i], teams[j])
             if winner not in data:

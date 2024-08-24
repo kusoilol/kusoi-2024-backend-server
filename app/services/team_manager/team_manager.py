@@ -22,6 +22,9 @@ class TeamManager:
     def get_main_filename(self) -> list[str]:
         return TeamManager._get_files_in_dir(self._team_path)
 
+    def has_solutions(self) -> bool:
+        return self.max_id == 0
+
     def get_main_solution(self):
         if self.max_id == 0:
             raise FileNotFoundError(f"Team {self.team_id} doesn't have any solutions yet")
