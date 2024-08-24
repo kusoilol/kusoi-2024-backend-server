@@ -53,4 +53,4 @@ ENV/
 env.bak/
 venv.bak/
 
-*.sqlite
+*.sqlite*
