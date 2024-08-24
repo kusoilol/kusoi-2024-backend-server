@@ -23,7 +23,7 @@ class TeamManager:
         return TeamManager._get_files_in_dir(self._team_path)
 
     def has_solutions(self) -> bool:
-        return self.max_id == 0
+        return self.max_id != 0
 
     def get_main_solution(self):
         if self.max_id == 0:
