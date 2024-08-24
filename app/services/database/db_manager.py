@@ -3,7 +3,7 @@ import time
 import uuid
 import sqlite3
 
-ABS_PATH = "C:\\Programming\\KUSOI\\server"
+ABS_PATH = "C:\\Programming\\KUSOI\\server\\data"
 
 
 class DBManager:
