@@ -36,8 +36,8 @@ class FileInteractor:
         self.process = subprocess.Popen(cmd,
                                         stdin=subprocess.PIPE,
                                         stdout=subprocess.PIPE,
-                                        text=True,
-                                        user=user)
+                                        text=True)
+                                        # user=user)
 
         self.output_thread = threading.Thread(target=self._enqueue_output, daemon=True)
         self.output_thread.start()
@@ -150,7 +150,7 @@ class GameBroker:
             return (self.turn + 1) % 2 + 1
 
         try:
-            _log('\n'.join(data))
+            # _log('\n'.join(data)) No longer needed cause one-liners from participants
             self.tester.send_input('\n'.join(data))
         except (RuntimeError, TypeError, ValueError, IOError):
             self._cleanup()
