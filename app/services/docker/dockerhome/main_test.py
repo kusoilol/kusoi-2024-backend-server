@@ -142,7 +142,7 @@ class GameBroker:
         try:
             n = player.read_output()
             if n is None:
-                _log(f"Player {self.turn % 2 + 1} didn't answer to tester's query")
+                _logErr(f"Player {self.turn % 2 + 1} didn't answer to tester's query")
                 self._cleanup()
                 return (self.turn + 1) % 2 + 1
             _log(f"Player {self.turn % 2 + 1}")
