@@ -159,8 +159,8 @@ class GameBroker:
         return 0
 
 
-PATH_1 = "../test/alice.py"
-PATH_2 = "../test/bob.py"
+PATH_1 = "alice.py"
+PATH_2 = "bob.py"
 PATH_3 = "tester.py"
 
 game_broker = GameBroker(PATH_1, Language.PYTHON, "alice",
