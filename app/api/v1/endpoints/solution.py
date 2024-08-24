@@ -1,3 +1,4 @@
+import io
 from uuid import UUID
 from fastapi import APIRouter, UploadFile, HTTPException
 from fastapi.responses import FileResponse
@@ -57,10 +58,10 @@ async def select_main(team_id: UUID, solution_id: int):
 
 
 @router.post("/")
-async def upload_solution(code: UploadFile, team_id: UUID, language: Language) \
+async def upload_solution(code: str, team_id: UUID, language: Language) \
         -> int:
     team_manager = TeamManager(team_id)
     try:
-        return team_manager.create_solution(code.file, language)
+        return team_manager.create_solution(io.BytesIO(code.encode()), language)
     except IOError as e:
         raise HTTPException(status_code=500, detail=str(e))
