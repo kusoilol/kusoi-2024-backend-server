@@ -29,7 +29,7 @@ class TeamManager:
 
     def get_language_of_main(self) -> Language:
         data = self.get_main_filename()[0].split('.')
-        extension = '.'.join(data[1:])
+        extension = '.' + '.'.join(data[1:])
         return Language(extension)
 
     def _get_history_sols(self):

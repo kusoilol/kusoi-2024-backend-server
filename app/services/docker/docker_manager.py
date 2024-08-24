@@ -4,7 +4,7 @@ import docker
 import docker.errors
 from docker.models.containers import Container
 
-from config import DOCKERPATH, TESTFOLDER, MAIN_TESTER
+from .config import DOCKERPATH, TESTFOLDER, MAIN_TESTER
 from app.schemas import Language
 
 

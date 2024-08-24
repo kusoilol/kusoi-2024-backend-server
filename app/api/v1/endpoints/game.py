@@ -24,7 +24,7 @@ def play(first_team: UUID, second_team: UUID) -> str:
         first_team, second_team = second_team, first_team
         first_path, second_path = second_path, first_path
         first_lang, second_lang = second_lang, first_lang
-    out = [first_team]
+    out = [str(first_team)]
     for i in range(3):
         try:
             dm = DockerManager()
