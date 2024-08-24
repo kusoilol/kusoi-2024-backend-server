@@ -1,12 +1,9 @@
-import random
 from uuid import UUID
 from typing import List
 
 from collections import defaultdict
-import docker.errors
-from fastapi import APIRouter, HTTPException
-from app.services import TeamManager, DockerManager, DBManager
-from app.schemas import Language
+from fastapi import APIRouter
+from app.services import DBManager
 from .game import play
 
 router = APIRouter(prefix="/tournament")
