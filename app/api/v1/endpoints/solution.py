@@ -2,6 +2,8 @@ import io
 from uuid import UUID
 from fastapi import APIRouter, UploadFile, HTTPException
 from fastapi.responses import FileResponse
+from pydantic import BaseModel
+
 from app.services import TeamManager
 from app.schemas import Language
 
@@ -57,11 +59,16 @@ async def select_main(team_id: UUID, solution_id: int):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+class Submission(BaseModel):
+    code: str
+    team_id: UUID
+    language: Language
+
 @router.post("/")
-async def upload_solution(code: str, team_id: UUID, language: Language) \
+async def upload_solution(data: Submission) \
         -> int:
-    team_manager = TeamManager(team_id)
+    team_manager = TeamManager(data.team_id)
     try:
-        return team_manager.create_solution(io.BytesIO(code.encode()), language)
+        return team_manager.create_solution(io.BytesIO(data.code.encode()), data.language)
     except IOError as e:
         raise HTTPException(status_code=500, detail=str(e))
