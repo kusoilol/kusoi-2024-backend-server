@@ -56,3 +56,4 @@ venv.bak/
 *.sqlite*
 
 data/
+.idea/
