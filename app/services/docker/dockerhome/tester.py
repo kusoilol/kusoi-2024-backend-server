@@ -1,46 +1,126 @@
-def in_bounds(i, j):
-    return 0 <= i <= 2 and 0 <= j <= 2
+import sys
+from copy import deepcopy
+
+DIRECTION_DELTAS = [(0, -1), (1, 0), (0, 1), (-1, 0)]
+READABLE_DIRS = ['up', 'right', 'down', 'left']
 
 
-def is_complete(field_):
-    deltas = [[1, 0], [1, 1], [0, 1], [-1, 1]]
-    for i in range(3):
-        for j in range(3):
-            for di, dj in deltas:
-                if in_bounds(i + di, j + dj) and in_bounds(i + 2 * di, j + 2 * dj):
-                    if field_[i][j] != '.' and field_[i][j] == field_[i + di][j + dj] == field_[i + di * 2][j + dj * 2]:
-                        return True
-    return False
+class Pos:
+    def __init__(self, x, y):
+        self.x = int(x)
+        self.y = int(y)
 
-
-print('SETUP 3')
-field = [['.'] * 3 for _ in range(3)]
-for l in field:
-    print(*l)
-turn = 0
-while turn <= 8:
-    n = int(input())
-    if n == 1:
-        i, j = map(int, input().split())
-        i -= 1
-        j -= 1
-        if in_bounds(i, j) and field[i][j] == '.':
-            field[i][j] = ['x', 'o'][turn % 2]
-            if is_complete(field):
-                print(f'WIN {1 + turn % 2}')
-                exit(0)
-            elif turn == 8 and not is_complete(field):
-                print('DRAW -1')
-                exit(0)
-            else:
-                print(f"KEEP 3")
-                for l in field:
-                    print(*l)
+    def __add__(self, other):
+        if isinstance(other, Pos):
+            return Pos(self.x + other.x, self.y + other.y)
         else:
-            print(f'LOSE {1 + turn % 2}')
-            exit(0)
-    else:
-        for _ in range(n):
-            input()
-        print(f'LOSE {1 + turn % 2}')
-    turn += 1
+            return Pos(self.x + other[0], self.y + other[1])
+
+    def __sub__(self, other):
+        if isinstance(other, Pos):
+            return Pos(self.x - other.x, self.y - other.y)
+        else:
+            return Pos(self.x - other[0], self.y - other[1])
+
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y
+
+
+class GameObject:
+    def __init__(self, pos, dir):
+        self.pos = pos
+        self.dir = dir
+
+
+def print_field():
+    f = deepcopy(field)
+    tank_dir_render = '↑→↓←'
+    for t in tanks:
+        if not t:
+            continue
+        f[t.pos.y][t.pos.x] = tank_dir_render[t.dir]
+    for b in bullets:
+        f[b.pos.y][b.pos.x] = '*'
+    for line in f:
+        print(''.join(line))
+
+
+def in_bounds(pos):
+    return FIELD_WIDTH > pos.x >= 0 and FIELD_HEIGHT > pos.y >= 0 and field[pos.y][pos.x] == '.'
+
+
+map_filename = sys.argv[1] if len(sys.argv) > 1 else 'default.txt'
+tanks = []
+bullets = set()
+field = []
+
+with open(map_filename) as f:
+    tanks_amount = int(f.readline())
+    for _ in range(tanks_amount):
+        a, b, c = map(int, f.readline().split())
+        tanks.append(GameObject(Pos(a, b), c))
+    for s in f.readlines():
+        field.append(list(s.strip()))
+FIELD_WIDTH = len(field[0])
+FIELD_HEIGHT = len(field)
+
+print_data = False
+# fw, bw, rr, rl, sh, ff - вперед, назад, поворот вправо, поворот влево, выстрел, похуй проебали
+for i in range(100):
+    for team in range(tanks_amount):
+        if tanks[team] is None:
+            continue
+        if len(tanks) - tanks.count(None) == 1:
+            for i in range(tanks_amount):
+                if tanks[i] is not None:
+                    print('win', i + 1)
+                    exit()
+        if i == 0:
+            print('setup', FIELD_HEIGHT + 1)
+            print(FIELD_HEIGHT, FIELD_WIDTH)
+            for line in field:
+                print(''.join(line))
+            continue
+        print('data', tanks_amount + 1 + len(bullets))
+        print(tanks[team].pos.x, tanks[team].pos.y, READABLE_DIRS[tanks[team].dir])
+        for team2 in range(tanks_amount):
+            if team != team2:
+                print(tanks[team2].pos.x, tanks[team2].pos.y, READABLE_DIRS[tanks[team2].dir])
+        print(len(bullets))
+        for bullet in bullets:
+            print(bullet.pos.x, bullet.pos.y, READABLE_DIRS[bullet.dir])
+        command = input()
+        if command == 'fw':
+            tanks[team].pos += DIRECTION_DELTAS[tanks[team].dir]
+            if not in_bounds(tanks[team].pos):
+                tanks[team].pos -= DIRECTION_DELTAS[tanks[team].dir]
+        elif command == 'bw':
+            tanks[team].pos += DIRECTION_DELTAS[(tanks[team].dir + 2) % 4]
+            if not in_bounds(tanks[team].pos):
+                tanks[team].pos -= DIRECTION_DELTAS[(tanks[team].dir + 2) % 4]
+        elif command == 'rr':
+            tanks[team].dir += 1
+            tanks[team].dir %= 4
+        elif command == 'rl':
+            tanks[team].dir -= 1
+            tanks[team].dir %= 4
+        elif command == 'sh':
+            bullets.add(GameObject(tanks[team].pos, tanks[team].dir))
+        else:
+            tanks[team] = None
+
+    new_bullets = set()
+    for b in bullets:
+        b.pos += DIRECTION_DELTAS[b.dir]
+        if in_bounds(b.pos):
+            for team in range(tanks_amount):
+                if tanks[team] is None:
+                    continue
+                if tanks[team].pos == b.pos:
+                    tanks[team] = None
+                    break
+            else:
+                new_bullets.add(b)
+    bullets = new_bullets
+
+print('draw -1')

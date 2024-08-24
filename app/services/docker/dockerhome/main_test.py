@@ -117,7 +117,7 @@ class GameBroker:
         except (RuntimeError, TypeError, ValueError, IOError):
             self._cleanup()
             raise
-        if command in ['WIN', 'LOSE', 'DRAW']:
+        if command in ['win', 'lose', 'draw']:
             self._cleanup()
             return n
         try:
@@ -144,8 +144,6 @@ class GameBroker:
             _log(f"Player {self.turn % 2 + 1}")
             _log(n)
             data = [n]
-            for _ in range(int(n)):
-                data.append(player.read_output())
         except (RuntimeError, TypeError, ValueError, IOError) as e:
             _log(f"Player {self.turn % 2 + 1} incorrect answer to tester's query\n: {str(e)}")
             self._cleanup()
@@ -161,8 +159,8 @@ class GameBroker:
         return 0
 
 
-PATH_1 = "alice.py"
-PATH_2 = "bob.py"
+PATH_1 = "../test/alice.py"
+PATH_2 = "../test/bob.py"
 PATH_3 = "tester.py"
 
 game_broker = GameBroker(PATH_1, Language.PYTHON, "alice",

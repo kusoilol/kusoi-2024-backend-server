@@ -1,12 +1,16 @@
-for _ in range(10):
-    field = [[i for i in input().split()] for _ in range(3)]
-    for i in range(3):
-        stop = False
-        for j in range(3):
-            if field[i][j] == '.':
-                print(1)
-                print(i + 1, j + 1)
-                stop = True
-                break
-        if stop:
-            break
+def read(board):
+    if board:
+        n, m = map(int, input().split())
+        for _ in range(n):
+            input()
+    else:
+        my_x, my_y, dir = input().split()
+        my_x, my_y, dir = input().split()
+        for i in range(int(input())):
+            input()
+
+board = True
+while True:
+    read(board)
+    board = False
+    print('sh')

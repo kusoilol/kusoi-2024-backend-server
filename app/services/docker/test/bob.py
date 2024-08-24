@@ -1,11 +1,16 @@
-for i in range(10):
-    field = [[i for i in input().split()] for _ in range(3)]
-    print(1)
-    if i == 0:
-        print("1 2")
-    elif i == 1:
-        print("3 1")
-    elif i == 2:
-        print("3 2")
-    elif i == 3:
-        print("3 3")
+def read(board):
+    if board:
+        n, m = map(int, input().split())
+        for _ in range(n):
+            input()
+    else:
+        my_x, my_y, dir = input().split()
+        my_x, my_y, dir = input().split()
+        for i in range(int(input())):
+            input()
+
+board = True
+while True:
+    read(board)
+    board = False
+    print('sh')
