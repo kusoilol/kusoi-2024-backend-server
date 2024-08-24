@@ -3,12 +3,12 @@ import time
 import uuid
 import sqlite3
 
-ABS_PATH = "C:\\Programming\\KUSOI\\server\\data"
+from .config import DATA_PATH
 
 
 class DBManager:
     def __init__(self):
-        self._conn = sqlite3.connect(os.path.join(ABS_PATH, 'db.sqlite'))
+        self._conn = sqlite3.connect(os.path.join(DATA_PATH, 'db.sqlite'))
         self.cursor = self._conn.cursor()
         res = self.cursor.execute("SELECT name FROM sqlite_master WHERE name='game'")
         if res.fetchone() is None:
