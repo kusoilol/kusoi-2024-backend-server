@@ -25,11 +25,11 @@ def get_data_of_team(team_id: UUID) -> tuple[str, Language]:
 
 
 def get_result_from_logs(logs: list[str]):
-    return logs[1].split('\n')[-2]
+    return logs[0].split('\n')[-2]
 
 
 @router.get("/run")
-async def play(first_team: UUID, second_team: UUID) -> tuple[str, UUID, UUID]:
+async def play(first_team: UUID, second_team: UUID) -> tuple[str, str, UUID]:
     first_path, first_lang = get_data_of_team(first_team)
     second_path, second_lang = get_data_of_team(second_team)
     if random.choice([False, True]):
@@ -49,7 +49,7 @@ async def play(first_team: UUID, second_team: UUID) -> tuple[str, UUID, UUID]:
     winner = get_result_from_logs(out)
     if winner == '-1':
         # non-existent winner so everybody loses
-        winner = "455bcbdf-1bc1-41b4-b876-e298bd4c6971"
+        winner = "draw"
     else:
         winner = first_team if winner == '1' else second_team
     log = '\n'.join(out)
