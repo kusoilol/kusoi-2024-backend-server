@@ -97,7 +97,7 @@ class DockerManager:
 
     def run_game(self, alice_path: str, alice_lang: Language,
                  bob_path: str, bob_lang: Language,
-                 build_image: bool = True) -> str:
+                 build_image: bool = False) -> str:
         try:
             if build_image:
                 self.build_image(DOCKERPATH)

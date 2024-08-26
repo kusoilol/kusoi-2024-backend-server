@@ -33,12 +33,19 @@ async def run_tournament(teams: List[UUID]) -> dict:
             new_data[team] = [0, 0, 0]
     data = new_data
 
+    managers = [TeamManager(team) for team in teams]
+
     for i in range(len(teams)):
-        if not TeamManager(teams[i]).has_solutions():
+        print(f'{teams[i]} team playing')
+        if not managers[i].has_solutions():
             continue
         for j in range(i + 1, len(teams)):
-            log, winner, game_id = await play(teams[i], teams[j])
-            data[winner][1] += 1
+            if managers[j].has_solutions():
+                log, winner, game_id = await play(teams[i], teams[j])
+                if winner != 'draw':
+                    if winner not in data:
+                        data[winner] = [0, 0, 0]
+                    data[winner][1] += 1
 
     for team, lst in data.items():
         if lst[1] != 0:
@@ -51,3 +58,8 @@ async def run_tournament(teams: List[UUID]) -> dict:
 @router.get('/score')
 async def get_score(team_id: UUID) -> int:
     return db.get_score(team_id)
+
+
+@router.get('/scoreboard')
+async def get_scoreboard() -> dict:
+    return db.dump_scoreboard()

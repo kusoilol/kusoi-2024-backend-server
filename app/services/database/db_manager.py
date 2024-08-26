@@ -32,7 +32,7 @@ class DBManager:
             """)
             self._conn.commit()
 
-    def add_game(self, team1: uuid.UUID, team2: uuid.UUID, winner: uuid.UUID, log: str) -> uuid.UUID:
+    def add_game(self, team1: uuid.UUID, team2: uuid.UUID, winner: str, log: str) -> uuid.UUID:
         game_id = uuid.uuid4()
         data = (str(game_id), str(team1), str(team2), str(winner), log)
         for i in range(3):
@@ -85,15 +85,16 @@ class DBManager:
             return 0
         return res[0]
 
-    def dump_scoreboard(self, teams: list[uuid.UUID]) -> dict:
+    def dump_scoreboard(self, teams: list[uuid.UUID] = None) -> dict:
         """
         :param teams: list of teams which result will be returned
         :return: scoreboard dump
         """
-        teams = set(teams)
+        if teams is not None:
+            teams = set(teams)
         data = dict()
         for team_id, score in self.cursor.execute("SELECT * from scoreboard").fetchall():
-            if uuid.UUID(team_id) in teams:
+            if teams is None or uuid.UUID(team_id) in teams:
                 data[team_id] = score
         return data
 

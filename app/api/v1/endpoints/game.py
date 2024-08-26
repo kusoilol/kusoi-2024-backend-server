@@ -10,9 +10,10 @@ import docker.errors
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from app.services import TeamManager, DockerManager
+from app.services import TeamManager
 from app.schemas import Language
 from app.db import db
+from app.dm import dm
 
 router = APIRouter(prefix="/game")
 
@@ -25,8 +26,11 @@ def get_data_of_team(team_id: UUID) -> tuple[str, Language]:
 
 
 def get_result_from_logs(logs: list[str]):
-    return logs[0].split('\n')[-2]
-
+    data = logs[0].split('\n')
+    for x in data[::-1]:
+        if 'win' in x or 'draw' in x:
+            return x
+    return "draw -1"
 
 @router.get("/run")
 async def play(first_team: UUID, second_team: UUID) -> tuple[str, str, UUID]:
@@ -37,21 +41,20 @@ async def play(first_team: UUID, second_team: UUID) -> tuple[str, str, UUID]:
         first_path, second_path = second_path, first_path
         first_lang, second_lang = second_lang, first_lang
     out = []
+    print(f'Playing {str(first_team)} and {str(second_team)}')
     for i in range(3):
         try:
-            dm = DockerManager()
             out.append(dm.run_game(first_path, first_lang, second_path, second_lang))
             break
         except docker.errors.DockerException as e:
             if i == 2:
                 raise HTTPException(status_code=500, detail=str(e))
 
-    winner = get_result_from_logs(out)
-    if winner == '-1':
-        # non-existent winner so everybody loses
-        winner = "draw"
-    else:
-        winner = first_team if winner == '1' else second_team
+    winner, code = get_result_from_logs(out).split()
+    if winner != 'draw':
+        winner = str(first_team) if code == '1' else str(second_team)
+    print(winner, code)
+    winner = str(winner)
     log = '\n'.join(out)
     game_id = db.add_game(first_team, second_team, winner, log)
     return log, winner, game_id
@@ -60,7 +63,7 @@ async def play(first_team: UUID, second_team: UUID) -> tuple[str, str, UUID]:
 class PlayResponse(BaseModel):
     timestamp: str
     game_id: UUID
-    winner: UUID
+    winner: str
     opponent: UUID
 
 
@@ -73,7 +76,7 @@ async def get_games_by_team_id(team_id: UUID) -> list[PlayResponse] | None:
     for a, b, c, d in data:
         out.append(PlayResponse(timestamp=a,
                                 game_id=b,
-                                winner=c,
+                                winner=str(c),
                                 opponent=d))
     return out
 
